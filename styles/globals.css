@@ -47,7 +47,7 @@
 .ball {
   top: 2px;
   left: 2px;
-  transition: transform 0.2s linear;
+  transition: transform 0.1s linear;
 }
 
 /*  target the elemenent after the label*/
