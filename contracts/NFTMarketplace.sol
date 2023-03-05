@@ -230,8 +230,3 @@ contract NFTMarketplace is ERC721URIStorage {
       return items;
     }
 }
-
-
-Documents:-
-https://docs.soliditylang.org/en/v0.8.14/
-
