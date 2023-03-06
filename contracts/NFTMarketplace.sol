@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.4; // set version to match with waht we have in our hardhat configuration
 
 // Using ERC721 standard
@@ -23,7 +23,10 @@ contract NFTMarketplace is ERC721URIStorage {
 
     // fee to list an nft on the marketplace
     // charge a listing fee.
-    uint256 listingPrice = 0.025 ether;
+    uint256 listingPrice = 20 ether;
+
+      uint256 ownerCommissionPercentage = 15;
+    uint256 creatorCommissionPercentage = 1000 - ownerCommissionPercentage;
 
     // declaring the owner of the contract
     // owner earns a commision on every item sold
@@ -57,6 +60,25 @@ contract NFTMarketplace is ERC721URIStorage {
     constructor() ERC721("Amiraverse", "AMIRA") {
       owner = payable(msg.sender);
     }
+
+  function getOwnerShare(uint256 x) private view returns(uint256) {
+        return (x / 1000) * ownerCommissionPercentage;
+    }
+
+    function getCreatorShare(uint256 x) private view returns(uint256) {
+        return (x / 1000) * creatorCommissionPercentage;
+    }
+
+    function updateOwnerCommissionPercentage(uint _ownerCommissionPercentage) public payable {
+        require(owner == msg.sender, "Only marketplace owner can update the listing price");
+
+        ownerCommissionPercentage = _ownerCommissionPercentage;
+    }
+
+    function getOwnerCommissionPercentage() public view returns (uint256) {
+        return ownerCommissionPercentage;
+    }
+
 
     /* Updates the listing price of the contract */
     function updateListingPrice(uint _listingPrice) public payable {
@@ -133,6 +155,9 @@ contract NFTMarketplace is ERC721URIStorage {
     /* Transfers ownership of the item, as well as funds between parties */
     function createMarketSale(uint256 tokenId) public payable {
       uint price = idToMarketItem[tokenId].price;
+      address payable creator = idToMarketItem[tokenId].seller;
+
+
       require(msg.value == price, "Please submit the asking price in order to complete the purchase");
       idToMarketItem[tokenId].owner = payable(msg.sender);
       idToMarketItem[tokenId].sold = true;
@@ -142,6 +167,8 @@ contract NFTMarketplace is ERC721URIStorage {
       _transfer(address(this), msg.sender, tokenId);
       payable(owner).transfer(listingPrice);
       payable(idToMarketItem[tokenId].seller).transfer(msg.value);
+      payable(creator).transfer(getCreatorShare(msg.value));
+
     }
 
     /* Returns all unsold market items */
