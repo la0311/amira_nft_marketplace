@@ -3,7 +3,7 @@ import Image from 'next/image';
 
 import { useRouter } from 'next/router';
 import { Loader, NFTCard, Button, Modal } from '../components';
-import { NFTContext } from '../context/NFTContext';
+import { NFTContext, isLoadingNFT } from '../context/NFTContext';
 
 import images from '../assets';
 import { shortenAddress } from '../utils/shortenAddress';
@@ -101,19 +101,19 @@ const NFTDetails = () => {
                 You cannot buy your own NFT.
               </p>
             ) : currentAccount === nft.owner.toLowerCase()
-            ?( 
-              <Button
-                btnName='List on Marketplace'
-                classStyles="mr-5 sm:mr-0 sm:mb-5 rounded-xl"
-                handleClick={()=>  router.push(`/resell-nft?tokenId=${nft.tokenId}&tokenURI=${nft.tokenURI}`)}
-              />
-            ):(
-              <Button
-                btnName={`Buy for ${nft.price} ${nftCurrency}`}
-                classStyles="mr-5 sm:mr-0 sm:mb-5 rounded-xl"
-                handleClick={() => setPaymentModal(true)}
-              />,
-            )}
+              ? (
+                <Button
+                  btnName="List on Marketplace"
+                  classStyles="mr-5 sm:mr-0 sm:mb-5 rounded-xl"
+                  handleClick={() => router.push(`/resell-nft?tokenId=${nft.tokenId}&tokenURI=${nft.tokenURI}`)}
+                />
+              ) : (
+                <Button
+                  btnName={`Buy for ${nft.price} ${nftCurrency}`}
+                  classStyles="mr-5 sm:mr-0 sm:mb-5 rounded-xl"
+                  handleClick={() => setPaymentModal(true)}
+                />
+              )}
         </div>
       </div>
 
@@ -136,6 +136,22 @@ const NFTDetails = () => {
         handleClose={() => setPaymentModal(false)}
       />
       )}
+
+      {isLoadingNFT
+      && (
+      <Modal
+        header="Buying NFT..."
+        body={(
+          <div className="flexCenter flex-col text-center">
+            <div className="relative w-52 h-52">
+              <Loader />
+            </div>
+          </div>
+        )}
+        handleClose={() => setPaymentModal(false)}
+      />
+      )}
+
       {successModal
       && (
       <Modal
